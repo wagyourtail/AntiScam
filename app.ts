@@ -175,6 +175,8 @@ bot.on("interactionCreate", async (int) => {
 
 });
 
+bot.on("ready", () => console.log("ready"));
+
 bot.login(token.toString());
 
 //TODO upload urls to pastebin on a timer
