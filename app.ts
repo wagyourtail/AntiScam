@@ -2,6 +2,9 @@ import {Mutex} from "async-mutex";
 import {Client, Intents, MessageEmbed} from "discord.js";
 import {MessageTypes} from "discord.js/typings/enums";
 import {existsSync, readFileSync, writeFileSync} from "fs";
+import whois from "whois-json";
+import {lookup} from "dns";
+import {lookup as geoip} from "geoip-lite";
 
 const token = readFileSync("token.txt").toString().trim();
 const bot = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]});
@@ -115,6 +118,15 @@ const re_weburl = new RegExp(
     "", "ig"
 );
 
+function dnslookup(url: string) {
+    return new Promise<string | null>((res, rej) => {
+        lookup(url, {family: 4}, (err, address, family) => {
+            if (err) res(null);
+            res(address);
+        });
+    });
+}
+
 
 bot.on("messageCreate", async (msg) => {
     if (msg.guild) {
@@ -135,7 +147,7 @@ bot.on("messageCreate", async (msg) => {
             }
         } else {
             // delete any message that already contains a detected link.
-            const known: {[url: string]: number} = await db.getValue("urls");
+            const known: { [url: string]: number } = await db.getValue("urls");
             for (const url of urls) {
                 if (url in known) {
                     if (known[url] < 0) {
@@ -151,12 +163,34 @@ bot.on("messageCreate", async (msg) => {
 bot.on("interactionCreate", async (int) => {
     if (int.isCommand()) {
         if (int.commandName == "report") {
-            const urls: string[] = [...int.options.getString("urls")?.matchAll(re_weburl) ?? []].map(e => e[1].replace(/^h[xt]{2}ps?:\/\//, ""));
+            const urls: [string, string][] = [...int.options.getString("urls")?.matchAll(re_weburl) ?? []].map(e => [e[0], e[1].replace(/^h[xt]{2}ps?:\/\//, "")]);
             // TODO: figure out how to get user command is "replying" to
             // TODO: delete replied to user's messages (if reply)
-            await int.reply({embeds: [new MessageEmbed().setTitle("Detected URLS:").setDescription(urls.join("\n")).setFooter("Wagyourtail 2021 | github.com/wagyourtail/AntiScam")]});
+            const embed = new MessageEmbed().setTitle("Detected URLS:").setFooter("Wagyourtail 2021 | github.com/wagyourtail/AntiScam");
+            //urls.map(e => `${e[1]} [(click to report)](https://phish.report/result?url=${encodeURIComponent(e[0])}&utm_source=homepage)`).join("\n")
+            for (const url of urls) {
+                const data: any = await whois(url[1]);
+                const ip = await dnslookup(url[1]);
+                let geolocation = "unknown";
+                if (ip) {
+                    const geo = geoip(ip);
+                    if (geo) {
+                        geolocation = `${geo.country} ${geo.region ?? ""} ${geo.city ?? ""}`
+                    }
+                }
+                embed.addField(
+                    url[1],
+                    `[click here to report](https://phish.report/result?url=${encodeURIComponent(url[0])}&utm_source=homepage)
+                    Registrar: [${data.registrar ?? "unknown"}](${data.registrarUrl.split(" ")[0] ?? ""})
+                    Abuse: \`${data.registrarAbuseContactEmail}\`
+                    Registration Date: ${data.creationDate} to ${data.registrarRegistrationExpirationDate}
+                    Registrant: \`${data.registrantName ?? ""}\`, \`${data.registrantOrganization ?? ""}\`, \`${data.registrantEmail ?? ""}\`, \`${data.registrantCountry ?? ""}\`
+                    IP: \`${ip}\`, \`${geolocation}\`
+                `);
+            }
+            await int.reply({embeds: [embed]});
             await db.updateValue<any>("urls", (obj) => {
-                for (const url of urls) {
+                for (const url of urls.map(e => e[1])) {
                     if (!obj) obj = {};
                     obj[url] = (obj[url] ?? 0) - 1;
                     return obj;
@@ -171,7 +205,10 @@ bot.on("interactionCreate", async (int) => {
                 await int.reply({embeds: [new MessageEmbed().setTitle("Missing Permissions:").setDescription("You need the Manage Server permission to use this command.")]});
             }
         } else if (int.commandName == "invite") {
-            await int.reply({embeds: [new MessageEmbed().setTitle("Invite").setDescription("https://discord.com/api/oauth2/authorize?client_id=902970889178583121&permissions=8&scope=applications.commands%20bot").setFooter("Wagyourtail 2021 | github.com/wagyourtail/AntiScam")], ephemeral: true});
+            await int.reply({
+                embeds: [new MessageEmbed().setTitle("Invite").setDescription("https://discord.com/api/oauth2/authorize?client_id=902970889178583121&permissions=8&scope=applications.commands%20bot").setFooter("Wagyourtail 2021 | github.com/wagyourtail/AntiScam")],
+                ephemeral: true
+            });
         }
     }
 });
