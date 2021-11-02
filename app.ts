@@ -3,7 +3,7 @@ import {Client, Intents, MessageEmbed} from "discord.js";
 import {MessageTypes} from "discord.js/typings/enums";
 import {existsSync, readFileSync, writeFileSync} from "fs";
 
-const token = readFileSync("token.txt");
+const token = readFileSync("token.txt").toString().trim();
 const bot = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGES]});
 const prefix = "~!";
 
@@ -177,6 +177,6 @@ bot.on("interactionCreate", async (int) => {
 
 bot.on("ready", () => console.log("ready"));
 
-bot.login(token.toString());
+bot.login(token);
 
 //TODO upload urls to pastebin on a timer
