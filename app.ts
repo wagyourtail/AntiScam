@@ -134,10 +134,8 @@ bot.on("messageCreate", async (msg) => {
                 });
             }
         } else {
-            console.log(urls);
             // delete any message that already contains a detected link.
             const known: {[url: string]: number} = await db.getValue("urls");
-            console.log(known);
             for (const url of urls) {
                 if (url in known) {
                     if (known[url] < 0) {
