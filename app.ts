@@ -118,7 +118,7 @@ const re_weburl = new RegExp(
 
 bot.on("messageCreate", async (msg) => {
     if (msg.guild) {
-        const urls: string[] = [...msg.content.matchAll(re_weburl)].map(e => e[1].replace(/^h[xt]{2}ps?:\/\//, ""));
+        const urls: string[] = [...msg.content.matchAll(re_weburl)].map(e => e[1].replace(/^https?:\/\//, ""));
         const hp: string | undefined = await db.getValue(`honeypots:${msg.guildId}`);
         if (msg.channelId == hp) {
             if (urls.length) {
