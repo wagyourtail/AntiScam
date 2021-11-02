@@ -154,7 +154,7 @@ bot.on("interactionCreate", async (int) => {
             const urls: string[] = [...int.options.getString("urls")?.matchAll(re_weburl) ?? []].map(e => e[1].replace(/^h[xt]{2}ps?:\/\//, ""));
             // TODO: figure out how to get user command is "replying" to
             // TODO: delete replied to user's messages (if reply)
-            await int.reply({embeds: [new MessageEmbed().setDescription(`Detected URLS: \n${urls.join("\n")}`).setFooter("Wagyourtail 2021 | github.com/wagyourtail/AntiScam")]});
+            await int.reply({embeds: [new MessageEmbed().setTitle("Detected URLS:").setDescription(urls.join("\n")).setFooter("Wagyourtail 2021 | github.com/wagyourtail/AntiScam")]});
             await db.updateValue<any>("urls", (obj) => {
                 for (const url of urls) {
                     if (!obj) obj = {};
