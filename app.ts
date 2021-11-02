@@ -163,9 +163,13 @@ bot.on("interactionCreate", async (int) => {
                 }
             });
         } else if (int.commandName == "honeypot") {
-            const channel = int.options.getChannel("channel");
-            await db.updateValue(`honeypots:${int.guild?.id}`, () => channel?.id);
-            await int.reply({embeds: [new MessageEmbed().setTitle("HoneyPot Channel:").setDescription(channel?.toString() ?? "bad channel")]});
+            if (int.memberPermissions?.has("MANAGE_GUILD", true)) {
+                const channel = int.options.getChannel("channel");
+                await db.updateValue(`honeypots:${int.guild?.id}`, () => channel?.id);
+                await int.reply({embeds: [new MessageEmbed().setTitle("HoneyPot Channel:").setDescription(channel?.toString() ?? "bad channel")]});
+            } else {
+                await int.reply({embeds: [new MessageEmbed().setTitle("Missing Permissions:").setDescription("You need the Manage Server permission to use this command.")]});
+            }
         }
     }
 
