@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "lib": [
+            "ES2020"
+        ],
+        "target": "ES2020",
+        "module": "CommonJS",
+        "declaration": false,
+        "strict": true,
+        "jsx": "react-jsx",
+        "esModuleInterop": true,
+        "experimentalDecorators": true
+    },
+    "include": [
+        "**.ts"
+    ]
+}
