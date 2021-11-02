@@ -122,7 +122,6 @@ bot.on("messageCreate", async (msg) => {
         const hp: string | undefined = await db.getValue(`honeypots:${msg.guildId}`);
         if (msg.channelId == hp) {
             if (urls.length) {
-                // TODO: delete this user's messages
                 // ban the user then unban to delete their recent messages easier
                 await msg.member?.ban({days: 1, reason: "honeypot triggered"});
                 await msg.guild.bans.remove(msg.author);
