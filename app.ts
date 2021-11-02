@@ -10,8 +10,8 @@ const prefix = "~!";
 class JsonDB {
     readonly readMutex = new Mutex();
     readonly writeMutex = new Mutex();
-    readonly file;
-    readonly sep;
+    readonly file: string;
+    readonly sep: string;
     json: any;
 
     constructor(id: string, sep: string) {
