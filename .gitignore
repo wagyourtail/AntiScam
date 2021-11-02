@@ -2,3 +2,5 @@ token.txt
 node_modules
 package-lock.json
 *.js
+.idea
+db.json
