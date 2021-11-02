@@ -154,7 +154,7 @@ bot.on("interactionCreate", async (int) => {
             const urls: string[] = [...int.options.getString("urls")?.matchAll(re_weburl) ?? []].map(e => e[1].replace(/^h[xt]{2}ps?:\/\//, ""));
             // TODO: figure out how to get user command is "replying" to
             // TODO: delete replied to user's messages (if reply)
-            await int.reply({embeds: [new MessageEmbed().setDescription(`Detected URLS: \n${urls.join("\n")}`)]});
+            await int.reply({embeds: [new MessageEmbed().setDescription(`Detected URLS: \n${urls.join("\n")}`).setFooter("Wagyourtail 2021")]});
             await db.updateValue<any>("urls", (obj) => {
                 for (const url of urls) {
                     if (!obj) obj = {};
@@ -170,9 +170,10 @@ bot.on("interactionCreate", async (int) => {
             } else {
                 await int.reply({embeds: [new MessageEmbed().setTitle("Missing Permissions:").setDescription("You need the Manage Server permission to use this command.")]});
             }
+        } else if (int.commandName == "invite") {
+            await int.reply({embeds: [new MessageEmbed().setTitle("Invite").setDescription("https://discord.com/api/oauth2/authorize?client_id=902970889178583121&permissions=8&scope=applications.commands%20bot").setFooter("Wagyourtail 2021")], ephemeral: true});
         }
     }
-
 });
 
 bot.on("ready", () => console.log("ready"));
