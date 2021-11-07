@@ -181,7 +181,7 @@ bot.on("interactionCreate", async (int) => {
                 embed.addField(
                     url[1],
                     `[click here to report](https://phish.report/result?url=${encodeURIComponent(url[0])}&utm_source=homepage)
-                    Registrar: [${data.registrar ?? "unknown"}](${data.registrarUrl.split(" ")[0] ?? ""})
+                    Registrar: [${data.registrar ?? "unknown"}](${data.registrarUrl?.split(" ")[0] ?? ""})
                     Abuse: \`${data.registrarAbuseContactEmail}\`
                     Registration Date: ${data.creationDate} to ${data.registrarRegistrationExpirationDate}
                     Registrant: \`${data.registrantName ?? ""}\`, \`${data.registrantOrganization ?? ""}\`, \`${data.registrantEmail ?? ""}\`, \`${data.registrantCountry ?? ""}\`
